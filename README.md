@@ -1,2 +1,0 @@
-# kyosian
-área de trabalho
