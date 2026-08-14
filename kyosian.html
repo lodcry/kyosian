@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KYOSIAN — O Mapa</title>
+<style>
+  :root {
+    --bg: #07070D;
+    --s1: #0D0D18;
+    --s2: #13131F;
+    --s3: #1A1A2E;
+    --border: #1E1E35;
+    --border2: #2A2A45;
+    --accent: #7C5CFC;
+    --accent2: #5CCEFC;
+    --gold: #F0C040;
+    --gold2: rgba(240,192,64,0.12);
+    --green: #5CFC9A;
+    --green2: rgba(92,252,154,0.10);
+    --pink: #FC5CAC;
+    --pink2: rgba(252,92,172,0.10);
+    --red: #FC5C6E;
+    --red2: rgba(252,92,110,0.10);
+    --text: #E8E8F8;
+    --muted: #6B6B90;
+    --muted2: #45455E;
+    --r: 10px;
+    --r2: 16px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* ── LAYOUT ── */
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 72px 0 56px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -120px; left: -80px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(124,92,252,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -60px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(92,206,252,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+
+  .hero-title {
+    font-size: clamp(36px, 6vw, 62px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+  }
+
+  .hero-title .line1 { display: block; color: var(--text); }
+  .hero-title .line2 {
+    display: block;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 36px;
+    line-height: 1.65;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .hero-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid;
+    letter-spacing: 0.3px;
+  }
+
+  .hb-arch   { border-color: rgba(124,92,252,0.4); color: var(--accent); background: rgba(124,92,252,0.08); }
+  .hb-ai     { border-color: rgba(92,206,252,0.4); color: var(--accent2); background: rgba(92,206,252,0.08); }
+  .hb-realtime { border-color: rgba(92,252,154,0.4); color: var(--green); background: var(--green2); }
+  .hb-mobile { border-color: rgba(240,192,64,0.4); color: var(--gold); background: var(--gold2); }
+  .hb-v4     { border-color: rgba(252,92,172,0.4); color: var(--pink); background: var(--pink2); }
+
+  /* ── SECTIONS ── */
+  .section { margin-bottom: 56px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .si-purple { background: rgba(124,92,252,0.15); border: 1px solid rgba(124,92,252,0.25); }
+  .si-blue   { background: rgba(92,206,252,0.12); border: 1px solid rgba(92,206,252,0.2); }
+  .si-green  { background: var(--green2); border: 1px solid rgba(92,252,154,0.2); }
+  .si-gold   { background: var(--gold2);  border: 1px solid rgba(240,192,64,0.2); }
+  .si-pink   { background: var(--pink2);  border: 1px solid rgba(252,92,172,0.2); }
+  .si-red    { background: var(--red2);   border: 1px solid rgba(252,92,110,0.2); }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .section-num {
+    font-size: 10px;
+    color: var(--muted2);
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  /* ── PROSE ── */
+  .prose {
+    color: var(--muted);
+    line-height: 1.75;
+    font-size: 14.5px;
+  }
+
+  .prose strong { color: var(--text); font-weight: 600; }
+
+  .prose p { margin-bottom: 14px; }
+  .prose p:last-child { margin-bottom: 0; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .card-head {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .card-title { font-weight: 700; font-size: 14px; flex: 1; }
+  .card-version { font-size: 10px; color: var(--muted2); }
+  .card-body { padding: 14px 18px; }
+
+  .card-state {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .cs-running { background: var(--green2); color: var(--green); border: 1px solid rgba(92,252,154,0.2); }
+  .cs-ai      { background: rgba(124,92,252,0.12); color: var(--accent); border: 1px solid rgba(124,92,252,0.2); }
+  .cs-infra   { background: rgba(92,206,252,0.10); color: var(--accent2); border: 1px solid rgba(92,206,252,0.2); }
+
+  /* ── TAGS ── */
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+
+  .tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid;
+  }
+
+  .t-api     { color: var(--accent2); border-color: rgba(92,206,252,0.3); background: rgba(92,206,252,0.07); }
+  .t-service { color: var(--accent);  border-color: rgba(124,92,252,0.3); background: rgba(124,92,252,0.07); }
+  .t-ws      { color: #FC9C5C;        border-color: rgba(252,156,92,0.3); background: rgba(252,156,92,0.07); }
+  .t-event   { color: var(--gold);    border-color: rgba(240,192,64,0.3); background: var(--gold2); }
+  .t-ui      { color: var(--green);   border-color: rgba(92,252,154,0.3); background: var(--green2); }
+  .t-mem     { color: var(--pink);    border-color: rgba(252,92,172,0.3); background: var(--pink2); }
+
+  /* ── GRID ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  @media (max-width: 620px) {
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+  }
+
+  /* ── FLOW ── */
+  .flow {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    padding: 20px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 2;
+  }
+
+  .flow-line { display: flex; align-items: center; gap: 10px; }
+  .flow-arrow { color: var(--muted2); }
+  .flow-node {
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  .fn-kernel  { background: rgba(124,92,252,0.15); color: var(--accent); border: 1px solid rgba(124,92,252,0.25); }
+  .fn-cap     { background: rgba(92,206,252,0.12); color: var(--accent2); border: 1px solid rgba(92,206,252,0.2); }
+  .fn-project { background: var(--green2); color: var(--green); border: 1px solid rgba(92,252,154,0.2); }
+  .fn-ai      { background: var(--pink2); color: var(--pink); border: 1px solid rgba(252,92,172,0.2); }
+  .fn-storage { background: var(--gold2); color: var(--gold); border: 1px solid rgba(240,192,64,0.2); }
+  .fn-browser { background: rgba(252,92,110,0.10); color: var(--red); border: 1px solid rgba(252,92,110,0.2); }
+
+  /* ── STAT STRIP ── */
+  .stat-strip {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .stat-box {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 18px;
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .stat-val {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-lbl { font-size: 10px; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+  .sv-purple { color: var(--accent); }
+  .sv-blue   { color: var(--accent2); }
+  .sv-green  { color: var(--green); }
+  .sv-gold   { color: var(--gold); }
+  .sv-pink   { color: var(--pink); }
+
+  /* ── ROLE CARD ── */
+  .role-card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .role-avatar {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    border: 1px solid var(--border2);
+  }
+
+  .role-name { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+  .role-title { font-size: 11px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .role-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .role-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+  .role-tag {
+    font-size: 10px; font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: var(--s3);
+    border: 1px solid var(--border2);
+    color: var(--muted);
+  }
+
+  /* ── PHASE CARD ── */
+  .phase {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: flex-start;
+  }
+
+  .phase-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .phase-content { flex: 1; }
+  .phase-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .phase-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .phase-caps { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+
+  .phase-cap {
+    font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 5px;
+    background: rgba(124,92,252,0.10);
+    border: 1px solid rgba(124,92,252,0.2);
+    color: var(--accent);
+    letter-spacing: 0.3px;
+  }
+
+  /* ── ARCH BLOCK ── */
+  .arch-block {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--r) var(--r) 0;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+  }
+
+  .arch-block.ab-blue  { border-left-color: var(--accent2); }
+  .arch-block.ab-green { border-left-color: var(--green); }
+  .arch-block.ab-gold  { border-left-color: var(--gold); }
+  .arch-block.ab-pink  { border-left-color: var(--pink); }
+
+  .ab-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .ab-desc  { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+
+  /* ── MEMORY NEURON ── */
+  .neuron-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .neuron {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 12px;
+    font-size: 11.5px;
+  }
+
+  .neuron-type {
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .nt-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .nt-fato        { color: var(--accent2); } .nt-fato .nt-dot { background: var(--accent2); }
+  .nt-preferencia { color: var(--pink); }    .nt-preferencia .nt-dot { background: var(--pink); }
+  .nt-objetivo    { color: var(--green); }   .nt-objetivo .nt-dot { background: var(--green); }
+  .nt-decisao     { color: var(--gold); }    .nt-decisao .nt-dot { background: var(--gold); }
+  .nt-inferencia  { color: var(--muted); }   .nt-inferencia .nt-dot { background: var(--muted); }
+
+  .neuron-text { color: var(--text); line-height: 1.4; }
+  .neuron-conf { font-size: 9px; color: var(--muted2); margin-top: 5px; }
+
+  /* ── GRAIL ── */
+  .grail {
+    background: linear-gradient(135deg, rgba(124,92,252,0.06), rgba(92,206,252,0.04));
+    border: 1px solid rgba(124,92,252,0.25);
+    border-radius: var(--r2);
+    padding: 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-top: 40px;
+  }
+
+  .grail::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(124,92,252,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .grail-crown { font-size: 40px; margin-bottom: 14px; }
+  .grail-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
+  .grail-desc { font-size: 14.5px; color: var(--muted); max-width: 500px; margin: 0 auto 20px; line-height: 1.7; }
+
+  .grail-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .gf-item {
+    font-size: 11px; font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--s2);
+    border: 1px solid var(--border2);
+    color: var(--muted);
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 40px 0;
+  }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11.5px;
+    background: var(--s3);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--accent2);
+  }
+
+  /* ── NAV (topo fixo, móvel) ── */
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(7,7,13,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .topnav::-webkit-scrollbar { display: none; }
+
+  .topnav-brand {
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--accent);
+    padding: 12px 16px 12px 0;
+    border-right: 1px solid var(--border);
+    margin-right: 8px;
+    white-space: nowrap;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+
+  .topnav a {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 12px 12px;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+
+  .topnav a:hover { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* ── FOOTNOTE ── */
+  .footnote {
+    font-size: 11px;
+    color: var(--muted2);
+    text-align: center;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+    line-height: 1.8;
+  }
+
+  /* ── HIGHLIGHT BOX ── */
+  .hbox {
+    background: var(--s2);
+    border: 1px solid var(--border2);
+    border-radius: var(--r);
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  .hbox strong { color: var(--text); }
+  .hbox.hb-accent { border-color: rgba(124,92,252,0.3); background: rgba(124,92,252,0.05); }
+  .hbox.hb-gold   { border-color: rgba(240,192,64,0.3); background: var(--gold2); }
+
+  /* ── CAP FULL ── */
+  .cap-full {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: var(--r2);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .cf-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--s2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cf-emoji { font-size: 22px; }
+  .cf-name  { font-weight: 800; font-size: 16px; flex: 1; }
+  .cf-ver   { font-size: 10px; color: var(--muted2); }
+  .cf-body  { padding: 16px 20px; }
+  .cf-desc  { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.55; }
+
+  .cf-contracts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .cf-dep { font-size: 11px; color: var(--muted2); margin-top: 8px; }
+  .cf-dep span { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav">
+  <div class="topnav-brand">KYOSIAN</div>
+  <a href="#visao">Visão</a>
+  <a href="#sian">O SIAN</a>
+  <a href="#arquitetura">Arquitetura</a>
+  <a href="#capabilities">Capabilities</a>
+  <a href="#memoria">Memória</a>
+  <a href="#projetos">Projetos</a>
+  <a href="#equipe">Equipe</a>
+  <a href="#plano">Plano</a>
+  <a href="#graal">O Graal</a>
+</nav>
+
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero" id="visao">
+  <div class="eyebrow">Documento interno · Kyosian Systems</div>
+  <h1 class="hero-title">
+    <span class="line1">Um kernel.</span>
+    <span class="line2">Uma empresa inteira.</span>
+  </h1>
+  <p class="hero-sub">
+    O que você está lendo não é documentação técnica. É o mapa de uma fundação —
+    construída do zero, em Termux, em Node.js puro, sem framework, sem dependência desnecessária.
+    Um sistema operacional de capabilities que sustenta tudo que vamos construir juntos.
+  </p>
+  <div class="hero-meta">
+    <span class="hero-badge hb-arch">Arquitetura Modular</span>
+    <span class="hero-badge hb-ai">IA com Memória Neural</span>
+    <span class="hero-badge hb-realtime">WebSocket Isolado</span>
+    <span class="hero-badge hb-mobile">Termux / Android</span>
+    <span class="hero-badge hb-v4">SIAN v4</span>
+  </div>
+</div>
+
+<!-- VISÃO -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-icon si-gold">🎯</div>
+    <div class="section-title">O que é esse projeto e por que existe</div>
+    <div class="section-num">00</div>
+  </div>
+  <div class="prose">
+    <p>
+      Toda empresa de tecnologia que sobrevive a longo prazo tem uma coisa em comum:
+      <strong>infraestrutura própria</strong>. Não dependência de plataformas alheias.
+      Não forks de projetos de terceiros. Algo construído por dentro, que conhecemos
+      cada linha, que controlamos completamente.
+    </p>
+    <p>
+      O SIAN é isso. É um runtime modular criado pelo Lucas — o arquiteto desta empresa —
+      que transforma capabilities isoladas em um ecossistema coeso. Cada produto que
+      construirmos, cada cliente que atendermos, cada ideia que explorarmos vai rodar
+      sobre essa base.
+    </p>
+    <p>
+      A ideia central é simples e poderosa: <strong>capabilities são módulos independentes
+      com contratos declarativos</strong>. O kernel descobre, valida, inicializa e orquestra.
+      Nenhuma parte precisa saber como outra funciona por dentro. Tudo se comunica por
+      contrato, por evento, por serviço — nunca por acoplamento direto.
+    </p>
+    <p>
+      E sobre tudo isso vamos construir o QG da nossa empresa: o ambiente onde trabalhamos,
+      planejamos, atendemos clientes, guardamos decisões, lembramos onde paramos,
+      coordenamos entre frontend, backend, vendas e marketing — em tempo real,
+      com IA que lembra tudo.
+    </p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- O SIAN -->
+<section class="section" id="sian">
+  <div class="section-header">
+    <div class="section-icon si-purple">⚙️</div>
+    <div class="section-title">O que é o SIAN</div>
+    <div class="section-num">01</div>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat-box">
+      <div class="stat-val sv-purple">15+</div>
+      <div class="stat-lbl">Capabilities</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val sv-blue">5</div>
+      <div class="stat-lbl">Tipos de Contrato</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val sv-green">11</div>
+      <div class="stat-lbl">Projetos Ativos</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val sv-gold">5</div>
+      <div class="stat-lbl">Chaves Groq</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val sv-pink">7700</div>
+      <div class="stat-lbl">Porta do Kernel</div>
+    </div>
+  </div>
+
+  <div class="prose">
+    <p>
+      <strong>SIAN significa Sistema Integrado de Arquitetura de Módulos.</strong>
+      É um kernel Node.js que roda em Termux, na porta 7700, e serve como o sistema
+      nervoso central de todos os nossos produtos e ferramentas.
+    </p>
+    <p>
+      Quando o SIAN sobe, ele escaneia a pasta <code>capabilities/</code>,
+      lê cada <code>manifest.json</code>, valida os contratos declarados,
+      resolve dependências, inicializa cada capability na ordem correta
+      e monta os contextos de cada projeto. Tudo automaticamente.
+      Sem lista manual. Sem configuração central.
+    </p>
+  </div>
+
+  <div class="hbox hb-accent">
+    <strong>Regra fundamental:</strong> o Kernel não sabe o que as capabilities fazem.
+    Ele sabe <em>que contratos elas declaram</em> e <em>se a implementação cumpre esses contratos</em>.
+    É separação de responsabilidades no nível mais profundo.
+  </div>
+
+  <div class="prose">
+    <p>
+      O Studio — acessível em <code>:7700/studio</code> — é o painel de controle completo:
+      capabilities, saúde, projetos, contratos, contextos, permissões, grafo de dependências,
+      stream de eventos em tempo real. Tudo observável, tudo controlável via HTTP.
+    </p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ARQUITETURA -->
+<section class="section" id="arquitetura">
+  <div class="section-header">
+    <div class="section-icon si-blue">🏛️</div>
+    <div class="section-title">Arquitetura profunda</div>
+    <div class="section-num">02</div>
+  </div>
+
+  <div class="prose">
+    <p>
+      O SIAN v4 é organizado em camadas que nunca se tocam diretamente.
+      Cada camada conhece apenas a interface da camada abaixo.
+    </p>
+  </div>
+
+  <div class="flow" style="margin: 20px 0;">
+    <div class="flow-line">
+      <span class="flow-node fn-browser">Browser / Cliente</span>
+      <span class="flow-arrow">→ fetch mesma origem →</span>
+      <span class="flow-node fn-project">Servidor do Projeto</span>
+    </div>
+    <div class="flow-line" style="padding-left: 24px;">
+      <span class="flow-arrow">↓ proxy HTTP com X-Project-Id</span>
+    </div>
+    <div class="flow-line">
+      <span class="flow-node fn-kernel">Kernel HTTP :7700</span>
+      <span class="flow-arrow">→ parse, auth, route →</span>
+      <span class="flow-node fn-cap">Capability API</span>
+    </div>
+    <div class="flow-line" style="padding-left: 24px;">
+      <span class="flow-arrow">↓ handler({ req, ctx, body })</span>
+    </div>
+    <div class="flow-line">
+      <span class="flow-node fn-ai">Orchestrator + Groq</span>
+      <span class="flow-arrow">→ resultado →</span>
+      <span class="flow-node fn-storage">Memória Neural (disco)</span>
+    </div>
+  </div>
+
+  <div class="prose" style="margin-bottom: 20px;">
+    <p>
+      O browser <strong>nunca fala diretamente com :7700</strong>.
+      Cada projeto tem seu próprio servidor (ex: :8091 para daidoula, :8092 para asisdev)
+      que faz proxy para o kernel. O header <code>X-Project-Id</code> é o que determina
+      qual contexto, quais capabilities, quais permissões se aplicam a cada requisição.
+    </p>
+  </div>
+
+  <div class="arch-block">
+    <div class="ab-title">Kernel — Composition Root</div>
+    <div class="ab-desc">
+      Instancia todos os subsistemas e os conecta. Não contém lógica de negócio.
+      KernelBoot, KernelLoader, KernelRoutes, KernelHTTP, KernelGenerator — cada um responsável por uma fase.
+      O Kernel delega, nunca executa diretamente.
+    </div>
+  </div>
+
+  <div class="arch-block ab-blue">
+    <div class="ab-title">ContractEngine + TypeRegistry — Validação por filesystem</div>
+    <div class="ab-desc">
+      O TypeRegistry descobre validadores em <code>type-registry/*/validator.js</code> automaticamente.
+      Para criar um novo tipo de contrato basta criar uma pasta com um arquivo.
+      O Kernel não sabe que WebSocket existe — sabe apenas que existe um validador para o tipo <code>ws</code>
+      que implementa o hook <code>onServerReady</code>.
+      Tipos ativos: <strong>api · service · ws · event · ui</strong>.
+    </div>
+  </div>
+
+  <div class="arch-block ab-green">
+    <div class="ab-title">Registry + LifecycleManager — Estado das capabilities</div>
+    <div class="ab-desc">
+      O Registry é um Map em memória com persistência opcional via sql.js (compatível com Termux).
+      Cada capability passa por: <code>discovered → loaded → init → running</code>.
+      O LifecycleManager chama <code>init()</code>, <code>start()</code>, <code>stop()</code>
+      e <code>destroy()</code> — todos opcionais. Se a capability não implementa, pula.
+    </div>
+  </div>
+
+  <div class="arch-block ab-gold">
+    <div class="ab-title">ContextManager + PermissionManager — Isolamento por projeto</div>
+    <div class="ab-desc">
+      Cada projeto tem um Context que contém apenas as capabilities que declarou em <code>sian.json</code>.
+      O <code>requireService()</code> verifica permissões em dois pontos: mount e acesso.
+      Visibility <code>public</code> significa acessível via API HTTP.
+      <code>context</code> significa injetável apenas por outras capabilities no mesmo contexto.
+    </div>
+  </div>
+
+  <div class="arch-block ab-pink">
+    <div class="ab-title">EventBus + EventRouter — Comunicação desacoplada</div>
+    <div class="ab-desc">
+      O bus é um singleton de eventos que atravessa todo o sistema. Capabilities declaram
+      no manifest quais eventos emitem e quais escutam. O EventRouter registra os handlers
+      automaticamente. O Studio recebe todos os eventos via SSE em tempo real.
+      Hot reload propaga a cascata de dependências automaticamente.
+    </div>
+  </div>
+
+</section>
+
+<div class="divider"></div>
+
+<!-- CAPABILITIES -->
+<section class="section" id="capabilities">
+  <div class="section-header">
+    <div class="section-icon si-green">🧩</div>
+    <div class="section-title">As Capabilities — o coração do sistema</div>
+    <div class="section-num">03</div>
+  </div>
+
+  <div class="prose" style="margin-bottom: 24px;">
+    <p>
+      Uma capability é a unidade fundamental do SIAN. Ela vive em <code>capabilities/nome/</code>,
+      declara seus contratos em <code>manifest.json</code>, implementa em <code>index.js</code>
+      e pode ter múltiplos contratos de tipos diferentes ao mesmo tempo.
+      Uma capability pode ser API, serviço, WebSocket, emissora de eventos e interface visual
+      — tudo ao mesmo tempo, se necessário.
+    </p>
+  </div>
+
+  <!-- INFRA -->
+  <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;">
+    INFRAESTRUTURA
+  </div>
+
+  <div class="cap-full">
+    <div class="cf-head">
+      <div class="cf-emoji">⚡</div>
+      <div class="cf-name">sockets</div>
+      <div class="cf-ver">v2.0.0</div>
+      <div class="card-state cs-infra">INFRA</div>
+    </div>
+    <div class="cf-body">
+      <div class="cf-desc">
+        WebSocket project-aware. Em v1 o broadcast era global — qualquer mensagem vazava para todos os clientes.
+        A v2 resolve: cada projeto tem seu canal isolado em <code>Map&lt;projectId, Set&lt;socket&gt;&gt;</code>.
+        Broadcast sem projectId gera erro explícito. O projectId vem do handshake via
+        <code>Sec-WebSocket-Protocol</code>, query string ou header customizado.
+        O WS é implementado na mão — encode/decode de frame raw sem lib externa.
+      </div>
+      <div class="cf-contracts">
+        <span class="tag t-ws">ws · socketsWs</span>
+        <span class="tag t-service">service · socketsService</span>
+      </div>
+      <div class="cf-dep">Métodos: <span>broadcast · broadcastEvento · send · clientesAtivos</span></div>
+    </div>
+  </div>
+
+  <div class="cap-full">
+    <div class="cf-head">
+      <div class="cf-emoji">🗄️</div>
+      <div class="cf-name">storage</div>
+      <div class="cf-ver">v2.0.0</div>
+      <div class="card-state cs-infra">INFRA</div>
+    </div>
+    <div class="cf-body">
+      <div class="cf-desc">
+        Storage contextual em memória com isolamento por projectId.
+        <code>Map&lt;projectId, Map&lt;key, value&gt;&gt;</code>.
+        Acessível como API pública (<code>sQLJs</code>) e como serviço injetável (<code>storageService</code>).
+        Outras capabilities como Nexus e orcafacil usam o storageService para persistir dados
+        sem depender de banco externo.
+      </div>
+      <div class="cf-contracts">
+        <span class="tag t-api">api · sQLJs</span>
+        <span class="tag t-service">service · storageService</span>
+      </div>
+      <div class="cf-dep">Métodos: <span>set · get · has · delete · list · clear</span></div>
+    </div>
+  </div>
+
+  <div class="cap-full">
+    <div class="cf-head">
+      <div class="cf-emoji">📋</div>
+      <div class="cf-name">tasks</div>
+      <div class="cf-ver">v1.0</div>
+      <div class="card-state cs-infra">INFRA</div>
+    </div>
+    <div class="cf-body">
+      <div class="cf-desc">
+        Gerenciamento de tarefas em memória com notificação em tempo real via sockets.
+        Demonstra o padrão de capability que <em>consume</em> outra capability via
+        <code>ctx.requireService()</code> — sem importar, sem acoplamento direto.
+      </div>
+      <div class="cf-contracts">
+        <span class="tag t-api">api · tasksApi</span>
+        <span class="tag t-service">service · tasksService</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORQUESTRAÇÃO -->
+  <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin:20px 0 10px;">
+    ORQUESTRAÇÃO
+  </div>
+
+  <div class="cap-full">
+    <div class="cf-head">
+      <div class="cf-emoji">◈</div>
+      <div class="cf-name">nexus</div>
+      <div class="cf-ver">v3.0.1</div>
+      <div class="card-state cs-running">RUNNING</div>
+    </div>
+    <div class="cf-body">
+      <div class="cf-desc">
+        Orquestrador de capabilities. Coordena hello, tasks, storage e sockets em um workflow.
+        Integra opcionalmente com orcafacil quando disponível no contexto — sem quebrar sem ele.
+        Expõe estado persistente por chave, histórico de workflows e eventos de orquestração.
+        É o exemplo mais completo de uma capability que consume múltiplas outras e expõe
+        API, serviço e evento ao mesmo tempo.
+      </div>
+      <div class="cf-contracts">
+        <span class="tag t-api">api · nexusApi</span>
+        <span class="tag t-service">service · nexusService</span>
+        <span class="tag t-event">event · nexusEvent</span>
+      </div>
+      <div class="cf-dep">Deps: <span>hello · tasks · storage · sockets</span></div>
+    </div>
+  </div>
+
+  <!-- IA -->
+  <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin:20px 0 10px;">
+    INTELIGÊNCIA ARTIFICIAL
+  </div>
+
+  <div class="cap-full">
+    <div class="cf-head">
+      <div class="cf-emoji">🤱</div>
+      <div class="cf-name">doulai</div>
+      <div class="cf-ver">v1.0.0</div>
+      <div class="card-state cs-ai">AI · GROQ</div>
+    </div>
+    <div class="cf-body">
+      <div class="cf-desc">
+        Capability cognitiva especializada em doula — apoio à gestação, parto e puerpério.
+        Pool de até 5 chaves Groq com rotação round-robin e cooldown por chave em rate limit.
+        Memória neural persistente em microarquivos JSON por projeto.
+        Retrieval seletivo por score de relevância — nunca carrega toda a memória.
+        Detecção e resolução de contradições entre memórias. Prompts em camadas:
+        identidade → regras → conhecimento de domínio → memórias ativas → contexto de sessão.
+        Autocontida — não depende de nenhuma outra capability.
+      </div>
+      <div class="cf-contracts">
+        <span class="tag t-api">api · doulaiApi</span>
+        <span class="tag t-service">service · doulaiService</span>
+      </div>
+      <div class="cf-dep">Rotas: <span>/chat · /memoria · /memoria/buscar · /memoria/esquecer · /sessao · /health</span></div>
+    </div>
+  </div>
+
+  <div class="cap-full">
+    <div class="cf-head">
+      <div class="cf-emoji">💻</div>
+      <div class="cf-name">lucasdevassis</div>
+      <div class="cf-ver">v1.0.0</div>
+      <div class="card-state cs-ai">AI · GROQ</div>
+    </div>
+    <div class="cf-body">
+      <div class="cf-desc">
+        Assistente Fullstack Sênior dedicado ao Lucas. Mesma arquitetura da doulai —
+        pool de 5 chaves Groq, memória neural persistente, retrieval seletivo,
+        detecção de contradições. Conhece profundamente o stack do Lucas:
+        Node.js, React, SIAN, arquitetura, segurança, testes, DevOps.
+        Tem o SIAN como tópico de conhecimento especializado.
+        Memória separada em <code>.lucasdev-memoria/</code> por projeto.
+      </div>
+      <div class="cf-contracts">
+        <span class="tag t-api">api · lucasdevassissApi</span>
+        <span class="tag t-service">service · lucasdevassissService</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cap-full">
+    <div class="cf-head">
+      <div class="cf-emoji">🏭</div>
+      <div class="cf-name">factorybeatscore</div>
+      <div class="cf-ver">v2.1.0</div>
+      <div class="card-state cs-ai">AI · CRIADOR</div>
+    </div>
+    <div class="cf-body">
+      <div class="cf-desc">
+        IA que lê o snapshot do SIAN ao vivo antes de responder. Cria e edita capabilities
+        com confirmação obrigatória antes de executar. Auto-fix: detecta erros após criação
+        e reescreve o <code>index.js</code> automaticamente via Groq.
+        Conhece as regras do SIAN por dentro — o padrão <code>routes()</code> para api,
+        os erros comuns, o formato de manifest. Interface: FactoryBeats (:8093).
+      </div>
+      <div class="cf-contracts">
+        <span class="tag t-api">api · factorybeatsApi</span>
+        <span class="tag t-service">service · factorybeatsService</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="divider"></div>
+
+<!-- MEMÓRIA NEURAL -->
+<section class="section" id="memoria">
+  <div class="section-header">
+    <div class="section-icon si-pink">🧠</div>
+    <div class="section-title">O sistema de memória neural</div>
+    <div class="section-num">04</div>
+  </div>
+
+  <div class="prose" style="margin-bottom: 20px;">
+    <p>
+      O que diferencia as capabilities de IA do SIAN de um simples wrapper de LLM
+      é a memória persistente por neurônio. Cada informação relevante sobre uma pessoa
+      ou contexto é armazenada como um neurônio independente em disco.
+      No próximo acesso, apenas os neurônios <em>relevantes</em> são ativados —
+      scored por tags, termos, tipo e recência.
+    </p>
+  </div>
+
+  <div class="arch-block">
+    <div class="ab-title">Estrutura de um neurônio</div>
+    <div class="ab-desc">
+      Cada neurônio é um JSON em <code>.doulai-memoria/neuronios/neu-xxx.json</code>.
+      Campos: <code>id · tipo · conteudo · resumo · tags · entidades · associacoes ·
+      confianca · origem · criadoEm · ultimaAtivacao · totalAtivacoes · status · contradizId</code>.
+      Gravação atômica via tmp + rename. Índice leve para retrieval rápido sem abrir todos os arquivos.
+    </div>
+  </div>
+
+  <div class="neuron-grid">
+    <div class="neuron">
+      <div class="neuron-type nt-fato"><div class="nt-dot"></div>FATO</div>
+      <div class="neuron-text">adenomiose — diagnóstico confirmado</div>
+      <div class="neuron-conf">conf: 100% · 21 ativações · origem: usuário</div>
+    </div>
+    <div class="neuron">
+      <div class="neuron-type nt-preferencia"><div class="nt-dot"></div>PREFERÊNCIA</div>
+      <div class="neuron-text">deseja ter um filho</div>
+      <div class="neuron-conf">conf: 100% · 34 ativações · origem: usuário</div>
+    </div>
+    <div class="neuron">
+      <div class="neuron-type nt-fato"><div class="nt-dot"></div>FATO</div>
+      <div class="neuron-text">25 anos de idade</div>
+      <div class="neuron-conf">conf: 100% · 17 ativações · corrigido de 19</div>
+    </div>
+    <div class="neuron">
+      <div class="neuron-type nt-inferencia"><div class="nt-dot"></div>INFERÊNCIA</div>
+      <div class="neuron-text">interesse em tipos de parto</div>
+      <div class="neuron-conf">conf: 100% · nova ativação</div>
+    </div>
+    <div class="neuron">
+      <div class="neuron-type nt-fato"><div class="nt-dot"></div>FATO</div>
+      <div class="neuron-text">acompanhamento médico há 3 anos</div>
+      <div class="neuron-conf">conf: 100% · 19 ativações</div>
+    </div>
+    <div class="neuron">
+      <div class="neuron-type nt-fato"><div class="nt-dot"></div>FATO</div>
+      <div class="neuron-text">usa Alurax para controle da dor</div>
+      <div class="neuron-conf">conf: 100% · corrigido Lurax→Alurax</div>
+    </div>
+  </div>
+
+  <div class="hbox" style="margin-top: 16px;">
+    <strong>Detecção de contradição:</strong> quando o modelo retorna um candidato de memória
+    que conflita com um neurônio existente (score ≥ 0.50), a contradição é detectada.
+    Se o score ≥ 0.80, resolução automática — o novo substitui o antigo e marca o antigo como
+    <code>contradito</code>. Abaixo de 0.80, fica pendente para confirmação.
+    O sistema aprendeu sozinho que "19 anos" era errado quando o usuário corrigiu para "25 anos".
+  </div>
+
+</section>
+
+<div class="divider"></div>
+
+<!-- PROJETOS STANDALONE -->
+<section class="section" id="projetos">
+  <div class="section-header">
+    <div class="section-icon si-blue">🚀</div>
+    <div class="section-title">Projetos standalone — o que já existe</div>
+    <div class="section-num">05</div>
+  </div>
+
+  <div class="prose" style="margin-bottom: 20px;">
+    <p>
+      Um projeto standalone é uma aplicação independente que registra no SIAN quais capabilities
+      precisa, recebe o <code>sian.runtime.js</code> e faz proxy para o kernel via HTTP.
+      O browser nunca conhece a porta 7700. Cada projeto tem sua própria porta, sua própria UI,
+      seu próprio domínio — mas o cérebro está no SIAN.
+    </p>
+  </div>
+
+  <div class="grid2">
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon si-pink">🤱</div>
+        <div>
+          <div class="card-title">daidoula</div>
+          <div class="card-version">:8091 — doulai · sockets · nexus</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="prose" style="font-size:12.5px;">
+          App mobile-first de doula com suporte à gestação, parto e puerpério.
+          Chat com IA que lembra o histórico da pessoa. Constelação animada de memórias ativas.
+          PWA instalável. TTS, reconhecimento de voz, lembretes via SSE + Push.
+          Identidade visual: paleta "vigília" — lamparina, brasa, noite.
+        </div>
+        <div class="tags" style="margin-top:10px;">
+          <span class="tag t-ui">PWA</span>
+          <span class="tag t-mem">Memória Neural</span>
+          <span class="tag t-ws">WebSocket</span>
+          <span class="tag t-api">SSE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon si-green">💻</div>
+        <div>
+          <div class="card-title">asisdev</div>
+          <div class="card-version">:8092 — lucasdevassis</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="prose" style="font-size:12.5px;">
+          Assistente de desenvolvimento pessoal do Lucas. Terminal-first.
+          IA com memória que conhece o stack, os projetos, as decisões tomadas.
+          Markdown com blocos de código, botão de cópia, painel de contexto ativo.
+          Paleta: verde terminal sobre void quase preto. Logo <code>{ · }</code> pulsante.
+        </div>
+        <div class="tags" style="margin-top:10px;">
+          <span class="tag t-api">Markdown</span>
+          <span class="tag t-mem">Contexto Dev</span>
+          <span class="tag t-ui">Terminal UI</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon si-purple">🏭</div>
+        <div>
+          <div class="card-title">factorybeats</div>
+          <div class="card-version">:8093 — factorybeatscore</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="prose" style="font-size:12.5px;">
+          IA que lê o SIAN ao vivo e cria capabilities com confirmação.
+          Snapshot em tempo real: capabilities rodando, versões, erros.
+          Fluxo criar/confirmar/auto-fix. Memória de padrões e erros anteriores.
+          Banner de plano pendente com botões Criar/Cancelar.
+        </div>
+        <div class="tags" style="margin-top:10px;">
+          <span class="tag t-api">Live Snapshot</span>
+          <span class="tag t-mem">Auto-fix</span>
+          <span class="tag t-ui">Factory UI</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon si-gold">⚙️</div>
+        <div>
+          <div class="card-title">SIAN Studio</div>
+          <div class="card-version">:7700/studio — interno</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="prose" style="font-size:12.5px;">
+          Dashboard de observabilidade completo. 16 abas: Status, Módulos, Health,
+          Projetos, Runtime, Deps, Contratos, Contextos, Permissões, Factory,
+          Stream, Graph, Eventos, Tasks, WS, Cache. SSE em tempo real. Hot reload badge.
+          Cliente HTTP puro — nunca importa código do kernel.
+        </div>
+        <div class="tags" style="margin-top:10px;">
+          <span class="tag t-ws">SSE Live</span>
+          <span class="tag t-api">16 páginas</span>
+          <span class="tag t-ui">Observability</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+<div class="divider"></div>
+
+<!-- EQUIPE -->
+<section class="section" id="equipe">
+  <div class="section-header">
+    <div class="section-icon si-gold">👥</div>
+    <div class="section-title">A equipe e seus papéis</div>
+    <div class="section-num">06</div>
+  </div>
+
+  <div class="prose" style="margin-bottom: 24px;">
+    <p>
+      Esta não é uma empresa de produto único. Somos uma equipe de execução rápida que
+      atende múltiplos clientes, constrói produtos únicos e opera em várias frentes simultaneamente.
+      Cada papel é definido não pela hierarquia, mas pela responsabilidade técnica e comercial.
+    </p>
+  </div>
+
+  <div class="role-card">
+    <div class="role-avatar" style="background:rgba(124,92,252,0.12);border-color:rgba(124,92,252,0.25);">👨‍💻</div>
+    <div>
+      <div class="role-name">Lucas</div>
+      <div class="role-title">Arquiteto de Sistema · Segurança · Backend Profundo</div>
+      <div class="role-desc">
+        Criador do SIAN. Responsável pela fundação técnica — kernel, capabilities, arquitetura de segurança,
+        infraestrutura no Termux. Define como o ecossistema cresce. O único que conhece
+        o sistema de dentro para fora. Ninguém na equipe precisa saber como o SIAN funciona —
+        só precisam usar o que ele constrói em cima.
+      </div>
+      <div class="role-tags">
+        <span class="role-tag">SIAN</span>
+        <span class="role-tag">Node.js</span>
+        <span class="role-tag">Segurança</span>
+        <span class="role-tag">Arquitetura</span>
+        <span class="role-tag">Termux</span>
+        <span class="role-tag">Decisão técnica final</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="role-card">
+    <div class="role-avatar" style="background:rgba(92,206,252,0.10);border-color:rgba(92,206,252,0.2);">🎨</div>
+    <div>
+      <div class="role-name">Frontend / Produto</div>
+      <div class="role-title">Interface · UX · Produto Visual</div>
+      <div class="role-desc">
+        Responsável por transformar capabilities em experiências. Constrói os standalones,
+        as interfaces dos clientes, as UIs dos produtos. Comunica com o SIAN via runtime
+        sem precisar entender o kernel. Decisor de produto e experiência do usuário.
+      </div>
+      <div class="role-tags">
+        <span class="role-tag">React</span>
+        <span class="role-tag">Next.js</span>
+        <span class="role-tag">UI/UX</span>
+        <span class="role-tag">Produto</span>
+        <span class="role-tag">Standalone</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="role-card">
+    <div class="role-avatar" style="background:rgba(92,252,154,0.08);border-color:rgba(92,252,154,0.2);">💼</div>
+    <div>
+      <div class="role-name">Vendas</div>
+      <div class="role-title">Aquisição · Relacionamento · Pipeline</div>
+      <div class="role-desc">
+        Responsável por trazer clientes e manter relacionamento. Usa o QG para registrar
+        o estado de cada cliente, onde a conversa parou, o que foi prometido, o que está pendente.
+        A IA do sistema lembra tudo que o vendedor registra e ajuda a preparar próximos contatos.
+      </div>
+      <div class="role-tags">
+        <span class="role-tag">Pipeline</span>
+        <span class="role-tag">Clientes</span>
+        <span class="role-tag">Propostas</span>
+        <span class="role-tag">Follow-up</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="role-card">
+    <div class="role-avatar" style="background:rgba(252,92,172,0.08);border-color:rgba(252,92,172,0.2);">📣</div>
+    <div>
+      <div class="role-name">Marketing</div>
+      <div class="role-title">Marca · Conteúdo · Posicionamento</div>
+      <div class="role-desc">
+        Responsável pela presença da empresa. Trabalha com o QG para manter histórico
+        de campanhas, decisões de marca, conteúdo publicado e resultados.
+        Usa as IAs do sistema para gerar conteúdo contextualizado e consistente com
+        o posicionamento definido.
+      </div>
+      <div class="role-tags">
+        <span class="role-tag">Marca</span>
+        <span class="role-tag">Conteúdo</span>
+        <span class="role-tag">Campanhas</span>
+        <span class="role-tag">Posicionamento</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="role-card">
+    <div class="role-avatar" style="background:rgba(240,192,64,0.10);border-color:rgba(240,192,64,0.2);">📊</div>
+    <div>
+      <div class="role-name">Administrativo</div>
+      <div class="role-title">Processos · Controle · Organização</div>
+      <div class="role-desc">
+        Responsável por garantir que a operação funcione. Contratos, financeiro,
+        onboarding de clientes, SLAs. Usa o QG para acompanhar projetos em andamento,
+        prazos, entregas e comunicações importantes.
+      </div>
+      <div class="role-tags">
+        <span class="role-tag">Contratos</span>
+        <span class="role-tag">Financeiro</span>
+        <span class="role-tag">Processos</span>
+        <span class="role-tag">Prazos</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="divider"></div>
+
+<!-- PLANO -->
+<section class="section" id="plano">
+  <div class="section-header">
+    <div class="section-icon si-red">📍</div>
+    <div class="section-title">O plano — como chegamos ao QG</div>
+    <div class="section-num">07</div>
+  </div>
+
+  <div class="prose" style="margin-bottom: 28px;">
+    <p>
+      O QG não é um produto a ser lançado. É um ambiente que vamos construir em cima
+      do que já temos — em camadas, fase a fase. Cada fase entrega valor real imediato
+      e prepara a base para a próxima. Nada é descartado. Tudo é acumulativo.
+    </p>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">1</div>
+    <div class="phase-content">
+      <div class="phase-title">Fundação — o que já temos</div>
+      <div class="phase-desc">
+        O SIAN v4 está rodando. Capabilities de infraestrutura estão ativas.
+        Três IAs com memória neural funcionando em produção: doulai, lucasdevassis, factorybeatscore.
+        Studio com observabilidade completa. Hot reload. Versionamento de capabilities.
+        Rollback. Projetos registrados e isolados. Esta é a base sobre a qual tudo sobe.
+      </div>
+      <div class="phase-caps">
+        <span class="phase-cap">sockets v2</span>
+        <span class="phase-cap">storage v2</span>
+        <span class="phase-cap">nexus v3</span>
+        <span class="phase-cap">tasks</span>
+        <span class="phase-cap">doulai</span>
+        <span class="phase-cap">lucasdevassis</span>
+        <span class="phase-cap">factorybeatscore</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">2</div>
+    <div class="phase-content">
+      <div class="phase-title">Workspace capability — o núcleo do QG</div>
+      <div class="phase-desc">
+        Uma nova capability <code>workspace</code> que gerencia: membros da equipe,
+        projetos de clientes, sessões de trabalho, metas, planos, decisões tomadas,
+        conquistas registradas. Cada membro ao entrar recebe o contexto do que tem para hoje,
+        onde parou ontem, o que está pendente. Usa storage para persistência e sockets para
+        sincronização em tempo real entre membros.
+      </div>
+      <div class="phase-caps">
+        <span class="phase-cap">workspace (nova)</span>
+        <span class="phase-cap">storage</span>
+        <span class="phase-cap">sockets</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">3</div>
+    <div class="phase-content">
+      <div class="phase-title">Assistente interna — a IA que conhece tudo</div>
+      <div class="phase-desc">
+        Uma capability de IA dedicada ao QG, treinada no contexto da empresa.
+        Ela sabe quem são os membros, quais clientes existem, quais produtos estão em andamento,
+        qual é o posicionamento de mercado, quais são as regras internas.
+        Quando alguém perguntar "onde o Lucas parou no projeto X?", ela sabe.
+        Pool de 5 chaves Groq. Memória neural por espaço de trabalho.
+        Este mapa HTML é o prompt base de conhecimento dessa assistente.
+      </div>
+      <div class="phase-caps">
+        <span class="phase-cap">assistente (nova)</span>
+        <span class="phase-cap">workspace</span>
+        <span class="phase-cap">5x Groq</span>
+        <span class="phase-cap">memória neural</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">4</div>
+    <div class="phase-content">
+      <div class="phase-title">UI interna — o standalone do QG</div>
+      <div class="phase-desc">
+        O ambiente visual onde a equipe vive. Pode começar como standalone simples
+        ou como uma capability com contrato <code>ui</code> — servida diretamente pelo SIAN.
+        Painéis por membro: o que tenho hoje, projetos ativos, clientes em andamento,
+        lembretes, planos, metas. Sincronizado em tempo real via WebSocket.
+        Cada pessoa vê seu contexto sem ver o dos outros.
+      </div>
+      <div class="phase-caps">
+        <span class="phase-cap">qg-ui (standalone ou ui cap)</span>
+        <span class="phase-cap">workspace</span>
+        <span class="phase-cap">sockets</span>
+        <span class="phase-cap">assistente</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">5</div>
+    <div class="phase-content">
+      <div class="phase-title">Clientes — cada projeto tem seu espaço</div>
+      <div class="phase-desc">
+        Para cada cliente, criamos um contexto no SIAN. O projeto do cliente tem suas capabilities
+        específicas, sua IA com memória do histórico, seu espaço de documentação.
+        A equipe acessa o contexto do cliente e a assistente já sabe o histórico, os acordos,
+        os próximos passos. Nexus orquestra quais capabilities estão ativas para cada cliente.
+        Rollback de versão se algo der errado. Isolamento total entre clientes.
+      </div>
+      <div class="phase-caps">
+        <span class="phase-cap">nexus</span>
+        <span class="phase-cap">workspace por cliente</span>
+        <span class="phase-cap">contexto isolado</span>
+        <span class="phase-cap">memória por projeto</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="divider"></div>
+
+<!-- O GRAAL -->
+<section class="section" id="graal">
+  <div class="section-header">
+    <div class="section-icon si-gold">🏆</div>
+    <div class="section-title">O Santo Graal — o estado almejado</div>
+    <div class="section-num">08</div>
+  </div>
+
+  <div class="prose" style="margin-bottom: 20px;">
+    <p>
+      Quando o QG estiver completo, cada membro da equipe abre o ambiente e encontra
+      um sistema que já sabe quem é, o que tem para hoje, onde parou ontem e o que os
+      outros estão fazendo. A IA responde perguntas sobre qualquer projeto, cliente ou
+      decisão histórica. As informações não se perdem. Os planos não ficam esquecidos
+      em conversas de WhatsApp. As conquistas são registradas e lembradas.
+    </p>
+    <p>
+      Não é um CRM. Não é uma ferramenta de gestão. É o <strong>sistema nervoso da empresa</strong> —
+      construído sobre infraestrutura que controlamos completamente, que funciona offline,
+      que roda no celular, que cresce com cada nova capability que adicionamos.
+    </p>
+  </div>
+
+  <div class="grail">
+    <div class="grail-crown">🏆</div>
+    <div class="grail-title">O QG da empresa</div>
+    <div class="grail-desc">
+      Um ambiente vivo onde tudo é lembrado, tudo é acessível, todos trabalham juntos
+      em tempo real — sobre uma fundação construída do zero, line by line, com poder e controle absolutos.
+    </div>
+    <div class="grail-features">
+      <span class="gf-item">🧠 IA que lembra tudo</span>
+      <span class="gf-item">⚡ Tempo real entre membros</span>
+      <span class="gf-item">🔒 Contextos isolados por cliente</span>
+      <span class="gf-item">📱 Funciona no celular</span>
+      <span class="gf-item">🔄 Sem dependência de terceiros</span>
+      <span class="gf-item">🧩 Capabilities plugáveis</span>
+      <span class="gf-item">📊 Observabilidade total</span>
+      <span class="gf-item">🚀 Escala por projeto</span>
+    </div>
+  </div>
+
+  <div class="hbox hb-gold" style="margin-top: 24px;">
+    <strong>Este documento é o ponto zero.</strong> O mapa que qualquer membro da equipe
+    pode ler para entender onde estamos, o que temos e para onde vamos.
+    É também o prompt base que alimenta a assistente interna —
+    ela nasce sabendo o que está escrito aqui.
+    Tudo que construirmos a partir de agora tem este documento como fundação de conhecimento.
+  </div>
+
+</section>
+
+</div><!-- /wrap -->
+
+<!-- FOOTNOTE -->
+<div class="wrap">
+  <div class="footnote">
+    KYOSIAN · SIAN v4 · Construído em Node.js puro no Termux<br>
+    Kernel em :7700 · Studio em :7700/studio · Groq pool 5 chaves<br>
+    <strong style="color:var(--muted);">Todo o poder está na capability. O kernel só descobre, valida e orquestra.</strong>
+  </div>
+</div>
+
+</body>
+</html>
